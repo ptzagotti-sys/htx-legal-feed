@@ -4,7 +4,14 @@
   <title>North Star Law Firm Insights</title>
   <link>https://htx-legal.net/insights</link>
   <description>Tax, bankruptcy, and SBA debt insights from North Star Law Firm (htx-legal.net and nm-legal.net)</description>
-  <lastBuildDate>Mon, 07 Sep 2026 04:36:55 +0000</lastBuildDate>
+  <lastBuildDate>Mon, 07 Sep 2026 10:14:44 +0000</lastBuildDate>
+  <item>
+    <title>Your blog post</title>
+    <link>https://htx-legal.net/blog-post</link>
+    <guid isPermaLink="true">https://htx-legal.net/blog-post</guid>
+    <pubDate>Mon, 07 Sep 2026 09:03:11 +0000</pubDate>
+    <description>Blog post description.</description>
+  </item>
   <item>
     <title>Micro-Captives After Drake Plastics: What Houston Captive Owners Still Have to File While the Fifth Circuit Appeal Runs</title>
     <link>https://htx-legal.net/micro-captive-disclosure-after-drake-plastics-houston</link>
@@ -287,13 +294,6 @@ The post When Banks Answer for Ponzi Schemes: The iCap Ruling and the Full Recov
     <guid isPermaLink="true">https://htx-legal.net/default-interest-506b-oversecured-lender-33-mako</guid>
     <pubDate>Sun, 09 Aug 2026 17:00:00 +0000</pubDate>
     <description>A bankruptcy judge enforced a 16% default rate against an insolvent estate under § 506(b). Why insolvency alone won't defeat default interest, plus the Fifth Circuit angle. </description>
-  </item>
-  <item>
-    <title>Will the DOJ Come After Your EIDL Loan? Who Actually Needs to Worry</title>
-    <link>https://htx-legal.net/will-the-doj-come-after-your-eidl-loan</link>
-    <guid isPermaLink="true">https://htx-legal.net/will-the-doj-come-after-your-eidl-loan</guid>
-    <pubDate>Sun, 09 Aug 2026 10:39:48 +0000</pubDate>
-    <description>The SBA referred 562,000 defaulted EIDL loans to Treasury and the DOJ. Houston attorney-CPA Phillip Zagotti explains who has real criminal exposure and what to do first.</description>
   </item>
 </channel>
 </rss>
