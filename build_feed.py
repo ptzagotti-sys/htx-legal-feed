@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build a combined RSS feed for htx-legal.net, nm-legal.net, and ca-legal.net.
+"""Build a combined RSS feed for htx-legal.net, nm-legal.net, ca-legal.net, and co-legal.net.
 
 htx-legal.net (Hostinger builder) publishes no feed, but embeds every blog
 post's metadata in the /insights page HTML; this script parses that data.
-nm-legal.net and ca-legal.net (WordPress) have native feeds, which are merged
-in. Published posts from all sites are sorted newest first and written to
+nm-legal.net, ca-legal.net, and co-legal.net (WordPress) have native feeds,
+which are merged in. Published posts from all sites are sorted newest first and written to
 feed.xml.
 
 Network fetches retry with backoff. If a source is unreachable after the
@@ -24,6 +24,11 @@ CA_FEED = "https://ca-legal.net/feed/"
 # with ten backdated posts (Aug 31 - Sep 9, 2026); without this cutoff dlvr.it
 # would push all of them to LinkedIn at once. Set to None to disable.
 CA_START = datetime(2026, 9, 10, tzinfo=timezone.utc)
+CO_FEED = "https://co-legal.net/feed/"
+# Same idea for co-legal.net: only posts dated on/after the site's launch week go
+# to LinkedIn, so a backfill of older-dated posts is never pushed. Set to None
+# to disable.
+CO_START = datetime(2026, 9, 24, tzinfo=timezone.utc)
 OUT = "feed.xml"
 LIMIT = 40
 # Hostinger's bot filter returned 403 to a bare "feed builder" user agent from
@@ -136,6 +141,7 @@ def main():
     now = datetime.now(timezone.utc)
     live += [p for p in wp_posts(NM_FEED) if p["dt"] <= now]
     live += [p for p in wp_posts(CA_FEED, CA_START) if p["dt"] <= now]
+    live += [p for p in wp_posts(CO_FEED, CO_START) if p["dt"] <= now]
     live.sort(key=lambda p: p["dt"], reverse=True)
     live = live[:LIMIT]
 
@@ -155,7 +161,7 @@ def main():
 <channel>
   <title>North Star Law Firm Insights</title>
   <link>{SRC}</link>
-  <description>Tax, bankruptcy, and SBA debt insights from North Star Law Firm (htx-legal.net, nm-legal.net, and ca-legal.net)</description>
+  <description>Tax, bankruptcy, and SBA debt insights from North Star Law Firm (htx-legal.net, nm-legal.net, ca-legal.net, and co-legal.net)</description>
   <lastBuildDate>{format_datetime(now)}</lastBuildDate>
 {chr(10).join(items)}
 </channel>
