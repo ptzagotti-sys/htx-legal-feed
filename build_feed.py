@@ -29,8 +29,18 @@ CO_FEED = "https://co-legal.net/feed/"
 # to LinkedIn, so a backfill of older-dated posts is never pushed. Set to None
 # to disable.
 CO_START = datetime(2026, 9, 24, tzinfo=timezone.utc)
+# Two feeds are written:
+#   full.xml  - every live post from all four sites, newest first.
+#   feed.xml  - the curated LinkedIn feed that dlvr.it reads. dlvr.it's free plan
+#               allows 10 posts a month per profile, so this carries only two
+#               randomly chosen posts a week (see pick_for_linkedin).
+FULL_OUT = "full.xml"
 OUT = "feed.xml"
+PICKS = "picks.json"
 LIMIT = 40
+CURATED_LIMIT = 12
+# Never record more than this many picks in one calendar month (free cap is 10).
+MONTHLY_CAP = 9
 # Hostinger's bot filter returned 403 to a bare "feed builder" user agent from
 # GitHub's runners, so present as an ordinary browser.
 HEADERS = {
@@ -95,6 +105,67 @@ def wp_posts(feed_url, start=None):
 def js(s):
     return json.loads(s)
 
+def load_picks():
+    if not os.path.exists(PICKS):
+        return []
+    try:
+        with open(PICKS, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"{PICKS} unreadable, starting fresh: {e}", file=sys.stderr)
+        return []
+
+def pick_for_linkedin(live, now):
+    """Draw at most one post per half-week for LinkedIn.
+
+    Each week is split into two windows in UTC: Monday 00:00 to Thursday 00:00,
+    and Thursday 00:00 to the following Monday 00:00. Once a window has closed,
+    the next hourly build draws one post at random from the posts published in
+    it and records the draw in picks.json, so later builds never re-roll it.
+    A window with no posts is recorded with url null so it is not re-checked.
+    Returns the updated picks list (newest last).
+    """
+    import random
+    from datetime import timedelta
+    picks = load_picks()
+    done = {p["window"] for p in picks}
+    # Windows start on Mondays and Thursdays. Walk back over the last 28 days
+    # so a build that was skipped (outage) still catches up on closed windows.
+    today = now.date()
+    starts = []
+    for back in range(0, 29):
+        d = today - timedelta(days=back)
+        if d.weekday() in (0, 3):  # Monday, Thursday
+            starts.append(d)
+    for d in sorted(starts):
+        start = datetime(d.year, d.month, d.day, tzinfo=timezone.utc)
+        end = start + timedelta(days=3 if d.weekday() == 0 else 4)
+        if end > now:
+            continue  # window still open
+        key = start.strftime("%Y-%m-%d")
+        if key in done:
+            continue
+        month_count = sum(1 for p in picks if p["url"] and p["picked_at"][:7] == now.strftime("%Y-%m"))
+        if month_count >= MONTHLY_CAP:
+            print(f"window {key}: monthly cap reached, skipping", file=sys.stderr)
+            picks.append({"window": key, "url": None, "picked_at": now.isoformat(),
+                          "note": "monthly cap"})
+            continue
+        already = {p["url"] for p in picks if p["url"]}
+        cands = [p for p in live if start <= p["dt"] < end and p["url"] not in already]
+        if not cands:
+            picks.append({"window": key, "url": None, "picked_at": now.isoformat(),
+                          "note": "no posts in window"})
+            print(f"window {key}: no posts", file=sys.stderr)
+            continue
+        chosen = random.choice(cands)
+        picks.append({"window": key, "url": chosen["url"], "title": chosen["title"],
+                      "description": chosen["description"], "picked_at": now.isoformat()})
+        print(f"window {key}: picked {chosen['url']} (of {len(cands)})", file=sys.stderr)
+    with open(PICKS, "w", encoding="utf-8") as f:
+        json.dump(picks, f, indent=2, ensure_ascii=False)
+    return picks
+
 def parse(page):
     posts = []
     for m in re.finditer(r'"type":\[0,"blog"\],' + S("name") + ',' + S("slug") + ',' + S("date") + ',' + B("isDraft") + ',' + B("isScheduled"), page):
@@ -146,20 +217,22 @@ def main():
     live = live[:LIMIT]
 
     def esc(s): return html.escape(s, quote=False)
-    items = []
-    for p in live:
-        url = p["url"]
-        items.append(f"""  <item>
+
+    def write_feed(path, entries, title):
+        items = []
+        for p in entries:
+            url = p["url"]
+            items.append(f"""  <item>
     <title>{esc(p['title'])}</title>
     <link>{url}</link>
     <guid isPermaLink="true">{url}</guid>
     <pubDate>{format_datetime(p['dt'])}</pubDate>
     <description>{esc(p['description'])}</description>
   </item>""")
-    feed = f"""<?xml version="1.0" encoding="UTF-8"?>
+        feed = f"""<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
 <channel>
-  <title>North Star Law Firm Insights</title>
+  <title>{title}</title>
   <link>{SRC}</link>
   <description>Tax, bankruptcy, and SBA debt insights from North Star Law Firm (htx-legal.net, nm-legal.net, ca-legal.net, and co-legal.net)</description>
   <lastBuildDate>{format_datetime(now)}</lastBuildDate>
@@ -167,9 +240,23 @@ def main():
 </channel>
 </rss>
 """
-    with open(OUT, "w", encoding="utf-8") as f:
-        f.write(feed)
-    print(f"htx parsed {len(posts)}, combined live {len(live)}, wrote {OUT}", file=sys.stderr)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(feed)
+
+    write_feed(FULL_OUT, live, "North Star Law Firm Insights (all posts)")
+
+    picks = pick_for_linkedin(live, now)
+    curated = []
+    for p in reversed(picks):           # newest pick first
+        if not p["url"]:
+            continue
+        curated.append({"title": p["title"], "url": p["url"],
+                        "description": p.get("description", ""),
+                        "dt": datetime.fromisoformat(p["picked_at"])})
+    curated = curated[:CURATED_LIMIT]
+    write_feed(OUT, curated, "North Star Law Firm Insights")
+    print(f"htx parsed {len(posts)}, combined live {len(live)}, wrote {FULL_OUT}; "
+          f"{len(curated)} curated picks in {OUT}", file=sys.stderr)
 
 if __name__ == "__main__":
     main()

@@ -22,7 +22,7 @@ jobs:
         run: |
           git config user.name "feed-bot"
           git config user.email "feed-bot@users.noreply.github.com"
-          git add feed.xml
+          git add feed.xml full.xml picks.json
           git diff --cached --quiet || git commit -m "Update feed $(date -u +%Y-%m-%dT%H:%MZ)"
           git pull --rebase
           git push
