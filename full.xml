@@ -4,7 +4,14 @@
   <title>North Star Law Firm Insights (all posts)</title>
   <link>https://htx-legal.net/insights</link>
   <description>Tax, bankruptcy, and SBA debt insights from North Star Law Firm (htx-legal.net, nm-legal.net, ca-legal.net, and co-legal.net)</description>
-  <lastBuildDate>Sat, 31 Oct 2026 23:21:44 +0000</lastBuildDate>
+  <lastBuildDate>Sun, 01 Nov 2026 05:58:01 +0000</lastBuildDate>
+  <item>
+    <title>EIDL Loans and Business Succession: Gifts, Trusts, and Sales</title>
+    <link>https://htx-legal.net/eidl-loan-business-succession</link>
+    <guid isPermaLink="true">https://htx-legal.net/eidl-loan-business-succession</guid>
+    <pubDate>Sun, 01 Nov 2026 04:50:29 +0000</pubDate>
+    <description>Gifting the business to your kids, moving it into a trust, or selling to a manager with a COVID EIDL on the books: the Note's ownership change clause, the SBA's lien, the assumption, and the tax side.</description>
+  </item>
   <item>
     <title>Will Bankruptcy Cost My California License? Section 525(a), Lacher and the CSLB Rule</title>
     <link>https://ca-legal.net/california-bankruptcy-professional-license-525a-lacher-cslb-judgment/</link>
@@ -307,13 +314,6 @@ The post Colorado Vendors and Out-of-State Bankruptcy Default Judgments After Co
     <guid isPermaLink="true">https://htx-legal.net/eidl-loan-after-death</guid>
     <pubDate>Mon, 05 Oct 2026 06:25:03 +0000</pubDate>
     <description>What happens to an SBA EIDL loan when the borrower dies: who owes, what the SBA can reach, the surviving spouse by state, and the rule that makes executors liable.</description>
-  </item>
-  <item>
-    <title>Default Interest, Late Fees and Forbearance Fees in a Houston Single Asset Real Estate Bankruptcy: Why Desert Willow Is Not the Fifth Circuit Rule</title>
-    <link>https://htx-legal.net/houston-single-asset-real-estate-bankruptcy-default-interest-506b-fifth-circuit</link>
-    <guid isPermaLink="true">https://htx-legal.net/houston-single-asset-real-estate-bankruptcy-default-interest-506b-fifth-circuit</guid>
-    <pubDate>Sun, 04 Oct 2026 17:00:00 +0000</pubDate>
-    <description>Houston single asset real estate bankruptcy: how the Fifth Circuit tests a lender's default interest, late fees and forbearance fees under 506(b), unlike Desert Willow.</description>
   </item>
 </channel>
 </rss>
